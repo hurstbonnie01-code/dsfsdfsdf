@@ -1,5 +1,8 @@
 build/
+vcpkg/
 *.swp
 *.swo
+*.user
+CMakeUserPresets.json
 .vscode/
 .idea/
