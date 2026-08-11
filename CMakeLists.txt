@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(glm REQUIRED)
 
 add_executable(vulkan_window main.cpp)
-target_link_libraries(vulkan_window PRIVATE Vulkan::Vulkan glfw)
+target_link_libraries(vulkan_window PRIVATE Vulkan::Vulkan glfw glm::glm)

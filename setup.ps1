@@ -100,7 +100,7 @@ if (-not (Test-Command "ninja")) {
     Install-WingetPackage -Id "Ninja-build.Ninja"
 }
 
-# 7. vcpkg for glfw3
+# 7. vcpkg for glfw3 and glm
 $vcpkgDir = Join-Path $PSScriptRoot "vcpkg"
 if (-not (Test-Path $vcpkgDir)) {
     Write-Host "Cloning vcpkg..." -ForegroundColor Cyan
