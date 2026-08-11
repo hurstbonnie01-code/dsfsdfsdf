@@ -115,6 +115,12 @@
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
             cameraPos += cameraRight * velocity;
         }
+        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+            cameraPos += glm::vec3(0.0f, 0.0f, 1.0f) * velocity;
+        }
+        if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+            cameraPos -= glm::vec3(0.0f, 0.0f, 1.0f) * velocity;
+        }
     }
     void VulkanWindow::updateCameraVectors() {
         glm::vec3 front;
