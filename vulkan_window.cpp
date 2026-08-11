@@ -568,12 +568,17 @@
         depthStencil.depthBoundsTestEnable = VK_FALSE;
         depthStencil.stencilTestEnable = VK_FALSE;
 
+        VkPushConstantRange pushConstantRange{};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof(glm::mat4);
+
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 1;
         pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
-        pipelineLayoutInfo.pushConstantRangeCount = 0;
-        pipelineLayoutInfo.pPushConstantRanges = nullptr;
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
         if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("failed to create pipeline layout");
@@ -1029,7 +1034,27 @@
         scissor.extent = swapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        vkCmdDrawIndexed(commandBuffer, 36, 64, 0, 0, 0);
+        glm::mat4 floorModel = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -0.6f)) *
+                                glm::scale(glm::mat4(1.0f), glm::vec3(20.0f, 20.0f, 0.2f));
+        vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &floorModel);
+        vkCmdDrawIndexed(commandBuffer, 36, 1, 0, 0, 0);
+
+        std::vector<std::pair<glm::vec3, glm::vec3>> obstacles = {
+            {glm::vec3(0.0f, -4.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f)},
+            {glm::vec3(0.0f, -2.0f, 0.25f), glm::vec3(0.8f, 0.8f, 0.5f)},
+            {glm::vec3(-1.5f, 0.0f, 0.5f), glm::vec3(0.8f, 0.8f, 0.5f)},
+            {glm::vec3(1.5f, 0.5f, 0.75f), glm::vec3(0.8f, 0.8f, 0.5f)},
+            {glm::vec3(0.0f, 2.5f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f)},
+            {glm::vec3(-1.0f, 4.5f, 1.25f), glm::vec3(0.8f, 0.8f, 0.5f)},
+            {glm::vec3(1.0f, 6.0f, 1.5f), glm::vec3(0.8f, 0.8f, 0.5f)},
+            {glm::vec3(0.0f, 8.0f, 2.0f), glm::vec3(1.2f, 1.2f, 1.0f)},
+        };
+
+        for (const auto& [pos, scale] : obstacles) {
+            glm::mat4 model = glm::translate(glm::mat4(1.0f), pos) * glm::scale(glm::mat4(1.0f), scale);
+            vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &model);
+            vkCmdDrawIndexed(commandBuffer, 36, 1, 0, 0, 0);
+        }
 
         vkCmdEndRenderPass(commandBuffer);
 
