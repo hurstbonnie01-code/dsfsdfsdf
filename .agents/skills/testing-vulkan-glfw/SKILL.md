@@ -47,6 +47,11 @@ import -window "$WINID" /tmp/vulkan_screenshot.png
   - there are red-dominant pixels (`R > 150, G < 80, B < 80`), green-dominant pixels (`G > 150, R < 80, B < 80`), and blue-dominant pixels (`B > 150, R < 80, G < 80`);
   - the colored region covers roughly the expected triangle area (e.g. `~12.5%` of an 800×600 window for a triangle with NDC coordinates `(-0.5,0.5)`, `(0.5,0.5)`, `(0,-0.5)`).
 - `scrot` can also capture the focused or whole desktop.
+- For an 8×8 grid of small rotating cubes, verify:
+  - the image is not all black and the window dimensions are `800×600`;
+  - the colored area is spread across many disconnected regions (e.g. > 10 connected components when using `scipy.ndimage.label` on the non-black mask), proving a grid of separate cubes rather than one solid shape;
+  - the scene contains red-dominant, green-dominant, and blue-dominant pixels;
+  - two frames captured 1 second apart differ by at least `5%` of pixels, confirming rotation/animation.
 
 ## Known environment quirks
 
