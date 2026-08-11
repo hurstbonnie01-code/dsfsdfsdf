@@ -8,5 +8,5 @@ find_package(Vulkan REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 
-add_executable(vulkan_window main.cpp)
+add_executable(vulkan_window main.cpp vulkan_window.cpp)
 target_link_libraries(vulkan_window PRIVATE Vulkan::Vulkan glfw glm::glm)
