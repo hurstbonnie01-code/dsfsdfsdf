@@ -88,7 +88,7 @@
         xoffset *= sensitivity;
         yoffset *= sensitivity;
 
-        yaw += static_cast<float>(xoffset);
+        yaw -= static_cast<float>(xoffset);
         pitch += static_cast<float>(yoffset);
 
         pitch = glm::clamp(pitch, -89.0f, 89.0f);
