@@ -28,6 +28,10 @@
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan Window", nullptr, nullptr);
+        glfwSetWindowUserPointer(window, this);
+        glfwSetCursorPosCallback(window, mouseCallbackStatic);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        updateCameraVectors();
     }
     void VulkanWindow::initVulkan() {
         createInstance();
@@ -52,10 +56,74 @@
     }
     void VulkanWindow::mainLoop() {
         while (!glfwWindowShouldClose(window)) {
+            float currentFrame = static_cast<float>(glfwGetTime());
+            deltaTime = currentFrame - lastFrameTime;
+            lastFrameTime = currentFrame;
+
             glfwPollEvents();
+            processInput();
             drawFrame();
         }
         vkDeviceWaitIdle(device);
+    }
+    void VulkanWindow::mouseCallbackStatic(GLFWwindow* window, double xpos, double ypos) {
+        VulkanWindow* app = reinterpret_cast<VulkanWindow*>(glfwGetWindowUserPointer(window));
+        if (app) {
+            app->mouseCallback(xpos, ypos);
+        }
+    }
+    void VulkanWindow::mouseCallback(double xpos, double ypos) {
+        if (firstMouse) {
+            lastMouseX = xpos;
+            lastMouseY = ypos;
+            firstMouse = false;
+        }
+
+        double xoffset = xpos - lastMouseX;
+        double yoffset = lastMouseY - ypos;
+        lastMouseX = xpos;
+        lastMouseY = ypos;
+
+        float sensitivity = mouseSensitivity;
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        yaw += static_cast<float>(xoffset);
+        pitch += static_cast<float>(yoffset);
+
+        pitch = glm::clamp(pitch, -89.0f, 89.0f);
+
+        updateCameraVectors();
+    }
+    void VulkanWindow::processInput() {
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            glfwSetWindowShouldClose(window, true);
+        }
+
+        float velocity = movementSpeed * deltaTime;
+
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+            cameraPos += glm::normalize(glm::vec3(cameraFront.x, cameraFront.y, 0.0f)) * velocity;
+        }
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+            cameraPos -= glm::normalize(glm::vec3(cameraFront.x, cameraFront.y, 0.0f)) * velocity;
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            cameraPos -= cameraRight * velocity;
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            cameraPos += cameraRight * velocity;
+        }
+    }
+    void VulkanWindow::updateCameraVectors() {
+        glm::vec3 front;
+        front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.y = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+        front.z = sin(glm::radians(pitch));
+        cameraFront = glm::normalize(front);
+
+        cameraRight = glm::normalize(glm::cross(cameraFront, glm::vec3(0.0f, 0.0f, 1.0f)));
+        cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
     }
     void VulkanWindow::cleanup() {
         vkDestroyPipeline(device, graphicsPipeline, nullptr);
@@ -773,7 +841,7 @@
         elapsedTime = time;
 
         UniformBufferObject ubo{};
-        ubo.view = glm::lookAt(glm::vec3(0.0f, -10.0f, 8.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 100.0f);
         ubo.proj[1][1] *= -1;
 

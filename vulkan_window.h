@@ -65,6 +65,21 @@ private:
     VkImageView depthImageView = VK_NULL_HANDLE;
 
     float elapsedTime = 0.0f;
+    float deltaTime = 0.0f;
+    float lastFrameTime = 0.0f;
+
+    // Camera
+    glm::vec3 cameraPos = glm::vec3(0.0f, -12.0f, 10.0f);
+    glm::vec3 cameraFront = glm::vec3(0.0f, 0.78f, -0.62f);
+    glm::vec3 cameraUp = glm::vec3(0.0f, 0.0f, 1.0f);
+    glm::vec3 cameraRight = glm::vec3(1.0f, 0.0f, 0.0f);
+    float yaw = 90.0f;
+    float pitch = -40.0f;
+    float movementSpeed = 5.0f;
+    float mouseSensitivity = 0.1f;
+    double lastMouseX = 0.0;
+    double lastMouseY = 0.0;
+    bool firstMouse = true;
 
     struct Vertex {
         float pos[3];
@@ -92,6 +107,10 @@ private:
     };
 
     void initWindow();
+    static void mouseCallbackStatic(GLFWwindow* window, double xpos, double ypos);
+    void mouseCallback(double xpos, double ypos);
+    void processInput();
+    void updateCameraVectors();
 
     void initVulkan();
 
