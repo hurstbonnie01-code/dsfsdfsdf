@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <set>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -54,7 +55,8 @@ private:
 
     VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
     VkDescriptorPool descriptorPool = VK_NULL_HANDLE;
-    std::vector<VkDescriptorSet> descriptorSets;
+    std::vector<VkDescriptorSet> floorDescriptorSets;
+    std::vector<VkDescriptorSet> obstacleDescriptorSets;
 
     std::vector<VkBuffer> uniformBuffers;
     std::vector<VkDeviceMemory> uniformBuffersMemory;
@@ -67,6 +69,15 @@ private:
     float elapsedTime = 0.0f;
     float deltaTime = 0.0f;
     float lastFrameTime = 0.0f;
+
+    struct Texture {
+        VkImage image = VK_NULL_HANDLE;
+        VkDeviceMemory memory = VK_NULL_HANDLE;
+        VkImageView view = VK_NULL_HANDLE;
+        VkSampler sampler = VK_NULL_HANDLE;
+    };
+    Texture floorTexture;
+    Texture obstacleTexture;
 
     // Camera
     glm::vec3 cameraPos = glm::vec3(0.0f, -12.0f, 10.0f);
@@ -84,6 +95,7 @@ private:
     struct Vertex {
         float pos[3];
         float color[3];
+        float texCoord[2];
     };
 
     struct UniformBufferObject {
@@ -168,6 +180,11 @@ private:
     void createDepthResources();
 
     void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+
+    void createTextureImage(const std::string& path, Texture& texture);
+    void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+    void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+    void createTextureSampler(Texture& texture);
 
     VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 
