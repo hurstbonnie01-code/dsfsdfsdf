@@ -9,4 +9,5 @@ find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
 
 add_executable(vulkan_window main.cpp vulkan_window.cpp)
+target_include_directories(vulkan_window PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(vulkan_window PRIVATE Vulkan::Vulkan glfw glm::glm)
